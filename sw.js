@@ -1,6 +1,6 @@
 // Stale-while-revalidate so the board works offline and still picks up updates.
 const CACHE = "pocket-sitcom-v1";
-const ASSETS = ["/", "/index.html", "/styles.css", "/app.js", "/sounds.js", "/icon.svg", "/icon-180.png", "/icon-512.png", "/manifest.webmanifest"];
+const ASSETS = ["/", "/index.html", "/styles.css", "/app.js", "/sounds.js", "/icon.svg", "/manifest.webmanifest"];
 
 self.addEventListener("install", (ev) => {
   ev.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
