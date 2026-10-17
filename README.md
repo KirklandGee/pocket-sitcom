@@ -2,7 +2,7 @@
 
 A sitcom soundboard for the browser — laugh tracks, applause, rimshots, sad trombones and more. A web rebuild of the old *Pocket Sitcom* iPhone app.
 
-Applause, Whoo!, Crickets, Rimshot, Drumroll, Doorbell, Record Scratch and Boing are **real recordings** (`audio/`), with a few variants each so repeat presses differ. Everything else is **synthesized live with the Web Audio API** (`sounds.js`), and the crowd is randomized on every press. A sampled pad falls back to its synth version until the recordings have loaded.
+Applause, Whoo!, Crickets, Rimshot, Drumroll, Doorbell, Record Scratch and Boing are **real recordings** (`audio/`), with a few variants each so repeat presses differ. Everything else is **synthesized live with the Web Audio API** (`sounds.js`), and the crowd is randomized on every press. A sampled pad falls back to its synth version until the recordings have loaded. The **Recorded / Synth** tabs at the top switch the whole board between the two versions.
 
 All recordings are CC0 from [BigSoundBank](https://bigsoundbank.com) (no attribution required). `scripts/build-sounds.mjs` lists each clip's source sound number and how it is trimmed.
 

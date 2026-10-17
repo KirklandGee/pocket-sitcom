@@ -380,8 +380,16 @@ export const samplesReady = (async () => {
   );
 })();
 
-// Plays a random loaded variant; returns its duration, or null if none loaded.
+// The board's Recorded / Synth switch: false plays the synth version of everything.
+let recordingsOn = true;
+export function useRecordings(on) {
+  recordingsOn = on;
+}
+
+// Plays a random loaded variant; returns its duration, or null if none loaded
+// (or recordings are switched off).
 function sample(k, id, start = k.t0, gain = 1) {
+  if (!recordingsOn) return null;
   const { clips, gain: base } = SAMPLES[id];
   const loaded = clips.map((name) => buffers.get(`/audio/${name}.mp3`)).filter(Boolean);
   if (!loaded.length) return null;
