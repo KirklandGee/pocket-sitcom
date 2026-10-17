@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Pocket Sitcom</title>
+    <meta name="description" content="A sitcom soundboard for your pocket: laugh tracks, applause, rimshots and more." />
+    <meta name="theme-color" content="#16110e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icon-180.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="studio">
+      <div class="signs" aria-hidden="true">
+        <span class="sign sign-air" id="sign-air">On Air</span>
+        <span class="sign" id="sign-laugh">Laugh</span>
+        <span class="sign" id="sign-applause">Applause</span>
+      </div>
+      <h1>Pocket Sitcom</h1>
+      <p class="tagline">Your own studio audience. Tap to play.</p>
+    </header>
+
+    <main id="board" aria-live="off"></main>
+
+    <nav class="dock">
+      <div class="tabs" id="tabs" role="tablist" aria-label="Sound screens"></div>
+      <button class="stop" id="stop" type="button" aria-label="Stop all sounds (Esc)">Stop</button>
+    </nav>
+
+    <footer class="hint">Keys <kbd>1</kbd>–<kbd>7</kbd> play · <kbd>←</kbd> <kbd>→</kbd> switch screens · <kbd>Esc</kbd> stops</footer>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "Pocket Sitcom",
+  "short_name": "Sitcom",
+  "description": "A sitcom soundboard: laugh tracks, applause, rimshots and more.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#16110e",
+  "theme_color": "#16110e",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

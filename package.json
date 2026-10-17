@@ -1,0 +1,13 @@
+{
+  "name": "pocket-sitcom",
+  "private": true,
+  "type": "module",
+  "description": "A sitcom soundboard in the browser. Static site, no build step.",
+  "scripts": {
+    "dev": "npx --yes serve -l 3000 .",
+    "loudness": "node scripts/loudness.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}
