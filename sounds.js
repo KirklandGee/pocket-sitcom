@@ -1,4 +1,6 @@
-// Every sound is synthesized with the Web Audio API — no audio files.
+// Sounds are recorded samples where we have a good one (audio/, built by
+// scripts/build-sounds.mjs) and synthesized with the Web Audio API otherwise.
+// A sampled sound falls back to its synth version until the samples load.
 // Each sound is `(k) => durationSeconds`, where `k` is a kit bound to an
 // AudioContext (live or offline), an output node, and a start time.
 
@@ -345,6 +347,55 @@ function slapBass(k, t, f, dur) {
   g.gain.setTargetAtTime(0, t + dur, 0.02);
 }
 
+// ---------- Recorded samples ----------
+
+// Sound id → clip variants in audio/ (each press picks one at random), and a
+// gain that matches the clips to the synth version's loudness, so the `level`
+// in app.js holds for both (tuned with scripts/loudness.mjs).
+const SAMPLES = {
+  applause: { clips: ["applause-1", "applause-2"], gain: 1 },
+  whoo: { clips: ["whoo-1", "whoo-2"], gain: 9.4 },
+  crickets: { clips: ["crickets-1", "crickets-2"], gain: 0.4 },
+  rimshot: { clips: ["rimshot-1", "rimshot-2", "rimshot-3"], gain: 2.4 },
+  drumroll: { clips: ["drumroll-1", "drumroll-2"], gain: 2.4 },
+  doorbell: { clips: ["doorbell-1", "doorbell-2"], gain: 1.15 },
+  scratch: { clips: ["scratch-1", "scratch-2", "scratch-3"], gain: 1.6 },
+  boing: { clips: ["boing-1", "boing-2"], gain: 1.55 },
+};
+export const SAMPLE_FILES = Object.values(SAMPLES).flatMap((s) => s.clips.map((name) => `/audio/${name}.mp3`));
+
+// AudioBuffers aren't tied to the context that decoded them, so decode once
+// up front (no user gesture needed) and play them in any live or offline context.
+const buffers = new Map();
+export const samplesReady = (async () => {
+  if (typeof OfflineAudioContext === "undefined") return;
+  const decoder = new OfflineAudioContext(2, 1, 44100);
+  await Promise.all(
+    SAMPLE_FILES.map(async (url) => {
+      try {
+        const res = await fetch(url);
+        if (res.ok) buffers.set(url, await decoder.decodeAudioData(await res.arrayBuffer()));
+      } catch {}
+    }),
+  );
+})();
+
+// The board's Recorded / Synth switch: false plays the synth version of everything.
+let recordingsOn = true;
+export function useRecordings(on) {
+  recordingsOn = on;
+}
+
+// Plays a random loaded variant; returns its duration, or null if none loaded
+// (or recordings are switched off).
+function sample(k, id, start = k.t0, gain = 1) {
+  if (!recordingsOn) return null;
+  const { clips, gain: base } = SAMPLES[id];
+  const loaded = clips.map((name) => buffers.get(`/audio/${name}.mp3`)).filter(Boolean);
+  if (!loaded.length) return null;
+  return playBuffer(k, loaded[Math.floor(Math.random() * loaded.length)], start, base * gain);
+}
+
 // ---------- The board ----------
 
 export const SOUNDS = {
@@ -353,11 +404,13 @@ export const SOUNDS = {
   roar: (k) => crowdLaugh(k, k.t0, { voices: 34, dur: 4.2, spread: 0.4 }),
   laughApplause: (k) => {
     const a = crowdLaugh(k, k.t0, { voices: 26, dur: 3.2 });
-    const b = 0.7 + applause(k, k.t0 + 0.7, 4.5, { clappers: 45 });
+    const b = 0.7 + (sample(k, "applause", k.t0 + 0.7) ?? applause(k, k.t0 + 0.7, 4.5, { clappers: 45 }));
     return Math.max(a, b);
   },
-  applause: (k) => applause(k, k.t0, 5, { clappers: 50 }),
+  applause: (k) => sample(k, "applause") ?? applause(k, k.t0, 5, { clappers: 50 }),
   whoo: (k) => {
+    const rec = sample(k, "whoo");
+    if (rec) return rec;
     const v = crowdVowel(k, k.t0, {
       voices: 6,
       dur: 1.3,
@@ -413,7 +466,7 @@ export const SOUNDS = {
       low: [85, 135],
       high: [165, 230],
     }),
-  crickets: (k) => playBuffer(k, cricketBuffer(k.ac, 3.6), k.t0, 0.5),
+  crickets: (k) => sample(k, "crickets") ?? playBuffer(k, cricketBuffer(k.ac, 3.6), k.t0, 0.5),
   sadTrombone: (k) => {
     const notes = [[233.08, 0.42], [220, 0.42], [207.65, 0.42], [196, 1.7]];
     let t = k.t0;
@@ -445,6 +498,8 @@ export const SOUNDS = {
     return t - k.t0 + 0.1;
   },
   rimshot: (k) => {
+    const rec = sample(k, "rimshot");
+    if (rec) return rec;
     tom(k, k.t0, 230);
     tom(k, k.t0 + 0.17, 165);
     kick(k, k.t0 + 0.42);
@@ -453,6 +508,8 @@ export const SOUNDS = {
     return 2.6;
   },
   drumroll: (k) => {
+    const rec = sample(k, "drumroll");
+    if (rec) return rec;
     const len = 2.2;
     for (let t = 0; t < len; t += (1 / 24) * rand(0.9, 1.1)) {
       snare(k, k.t0 + t, (0.18 + 0.6 * (t / len)) * rand(0.8, 1));
@@ -490,11 +547,15 @@ export const SOUNDS = {
     return 14 * e + 2.2;
   },
   doorbell: (k) => {
+    const rec = sample(k, "doorbell");
+    if (rec) return rec;
     bell(k, k.t0, 659.25);
     bell(k, k.t0 + 0.55, 523.25);
     return 3.2;
   },
   scratch: (k) => {
+    const rec = sample(k, "scratch");
+    if (rec) return rec;
     const d = 0.55;
     const g = k.gain(0);
     const bp = k.filter("bandpass", 600, 3, g);
@@ -515,6 +576,8 @@ export const SOUNDS = {
     return d + 0.1;
   },
   boing: (k) => {
+    const rec = sample(k, "boing");
+    if (rec) return rec;
     const d = 0.9;
     const g = k.gain(0);
     const o = k.osc("triangle", 200, k.t0, d, g);

@@ -1,4 +1,4 @@
-import { SOUNDS, kit } from "./sounds.js";
+import { SOUNDS, kit, useRecordings } from "./sounds.js";
 
 // `level` evens out loudness across sounds (tuned with scripts/loudness.mjs).
 const SCREENS = [
@@ -161,10 +161,40 @@ function render() {
   });
 }
 
+const VERSIONS = [
+  { id: "recorded", label: "Recorded" },
+  { id: "synth", label: "Synth" },
+];
+
+function renderVersions() {
+  const bar = document.getElementById("versions");
+  VERSIONS.forEach((v) => {
+    const tab = document.createElement("button");
+    tab.className = "tab";
+    tab.type = "button";
+    tab.dataset.version = v.id;
+    tab.textContent = v.label;
+    tab.setAttribute("role", "tab");
+    tab.addEventListener("click", () => setVersion(v.id));
+    bar.appendChild(tab);
+  });
+}
+
+function setVersion(id) {
+  useRecordings(id === "recorded");
+  document.querySelectorAll("#versions .tab").forEach((el) => {
+    el.setAttribute("aria-selected", String(el.dataset.version === id));
+    el.tabIndex = el.dataset.version === id ? 0 : -1;
+  });
+  try {
+    localStorage.setItem("pocket-sitcom:version", id);
+  } catch {}
+}
+
 function show(i) {
   current = (i + SCREENS.length) % SCREENS.length;
   document.querySelectorAll(".screen").forEach((el, si) => (el.hidden = si !== current));
-  document.querySelectorAll(".tab").forEach((el, si) => {
+  document.querySelectorAll("#tabs .tab").forEach((el, si) => {
     el.setAttribute("aria-selected", String(si === current));
     el.tabIndex = si === current ? 0 : -1;
   });
@@ -191,6 +221,12 @@ document.addEventListener("keydown", (ev) => {
 document.getElementById("stop").addEventListener("click", stopAll);
 
 render();
+renderVersions();
+let version = "recorded";
+try {
+  if (localStorage.getItem("pocket-sitcom:version") === "synth") version = "synth";
+} catch {}
+setVersion(version);
 let saved = 0;
 try {
   saved = Number(localStorage.getItem("pocket-sitcom:screen")) || 0;

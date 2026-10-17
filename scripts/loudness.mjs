@@ -7,7 +7,7 @@ import { extname, join } from "node:path";
 import { chromium } from "playwright";
 
 const root = new URL("..", import.meta.url).pathname;
-const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml" };
+const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".mp3": "audio/mpeg" };
 const server = createServer(async (req, res) => {
   const path = req.url === "/" ? "/index.html" : req.url.split("?")[0];
   try {
@@ -29,7 +29,8 @@ await page.goto(`http://localhost:${port}/`);
 await page.waitForFunction(() => window.__pocketSitcom);
 
 const results = await page.evaluate(async () => {
-  const { SOUNDS, kit } = await import("/sounds.js");
+  const { SOUNDS, kit, samplesReady } = await import("/sounds.js");
+  await samplesReady;
   const { SCREENS } = window.__pocketSitcom;
   const out = [];
   for (const s of SCREENS.flatMap((x) => x.sounds)) {

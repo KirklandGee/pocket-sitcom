@@ -263,6 +263,16 @@ kbd {
   border: 1px solid var(--line);
 }
 
+.versions {
+  max-width: 280px;
+  margin: 18px auto 0;
+}
+
+.versions .tab {
+  min-height: 36px;
+  font-size: 14px;
+}
+
 .tab {
   flex: 1;
   min-height: 44px;
